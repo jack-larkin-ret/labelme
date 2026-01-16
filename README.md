@@ -67,7 +67,7 @@ For more detail, check ["Install Labelme using Terminal"](https://www.labelme.io
 pip install labelme
 
 # To install the latest version from GitHub:
-# pip install git+https://github.com/wkentaro/labelme.git
+# pip install git+https://github.com/jack-larkin-ret/labelme.git@jlarkin/retiina-customization
 ```
 
 ### Option 2: Using standalone executable (Easiest)

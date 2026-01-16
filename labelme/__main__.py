@@ -181,6 +181,13 @@ def main():
         help="epsilon to find nearest vertex on canvas",
         default=argparse.SUPPRESS,
     )
+    ## Jack
+    parser.add_argument(
+        "--firstrow",
+        dest="first_row",
+        help="Start at a certain image in the directory. The number entered here will match the number displayed on the top of the window.",
+        default=0
+    )
     args = parser.parse_args()
 
     if args.version:
@@ -247,11 +254,16 @@ def main():
     app.setApplicationName(__appname__)
     app.setWindowIcon(newIcon("icon"))
     app.installTranslator(translator)
+    ## Jack - choosing lazyness here to match up with number displayed in top of window. 
+    ## Set current row is robust enough to handle negative and if you enter a number 
+    ## greater than the number of images it defaults to 0
+    first_row = int(args.first_row) - 2
     win = MainWindow(
         config=config,
         filename=filename,
         output_file=output_file,
         output_dir=output_dir,
+        first_row=first_row,
     )
 
     if reset_config:

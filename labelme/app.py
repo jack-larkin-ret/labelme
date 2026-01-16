@@ -92,6 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
         output: str | None = None,
         output_file: str | None = None,
         output_dir: str | None = None,
+        first_row: int = 0,
     ) -> None:
         if output is not None:
             logger.warning("argument output is deprecated, use output_file instead")
@@ -959,6 +960,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if filename:
             if osp.isdir(filename):
                 self._import_images_from_dir(root_dir=filename)
+
+                self.fileListWidget.setCurrentRow(first_row)
+
                 self._open_next_image()
             else:
                 self._load_file(filename=filename)
@@ -1366,9 +1370,11 @@ class MainWindow(QtWidgets.QMainWindow):
         shape.line_color = QtGui.QColor(r, g, b)
         shape.vertex_fill_color = QtGui.QColor(r, g, b)
         shape.hvertex_fill_color = QtGui.QColor(255, 255, 255)
-        shape.fill_color = QtGui.QColor(r, g, b, 128)
-        shape.select_line_color = QtGui.QColor(255, 255, 255)
-        shape.select_fill_color = QtGui.QColor(r, g, b, 155)
+        shape.fill_color = QtGui.QColor(r, g, b, 64)
+        ## Jack - update 4th number to 0 to make transparent
+        shape.select_line_color = QtGui.QColor(255, 255, 255, 0)
+        ## Jack - update 4th number to 0 to make transparent
+        shape.select_fill_color = QtGui.QColor(r, g, b, 0)
 
     def _get_rgb_by_label(self, label: str) -> tuple[int, int, int]:
         if self._config["shape_color"] == "auto":
@@ -1925,6 +1931,8 @@ class MainWindow(QtWidgets.QMainWindow):
         logger.debug("setting current row to {:d}", row_next)
         self.fileListWidget.setCurrentRow(row_next)
         self.fileListWidget.repaint()
+        ## Jack
+        self.start_review_labels()
 
     def _open_file_with_dialog(self, _value: bool = False) -> None:
         if not self._can_continue():
@@ -2256,6 +2264,41 @@ class MainWindow(QtWidgets.QMainWindow):
         stats.append(f"x={mouse_pos.x():6.1f}, y={mouse_pos.y():6.1f}")
         self.status_right.setText(" | ".join(stats))
 
+    ## Jack
+    def start_review_labels(self):
+        """
+        Step through each label in the label list.
+        Double-clicks each item programmatically to open the Edit Label dialog.
+        """
+        if len(self.labelList) == 0:
+            return
+
+        self._review_label_index = 0
+        QtCore.QTimer.singleShot(0, self._review_next_label)
+
+
+    def _review_next_label(self):
+        if not hasattr(self, "_review_label_index"):
+            return
+
+        i = self._review_label_index
+        if i >= len(self.labelList):
+            delattr(self, "_review_label_index")
+            return
+
+        item = self.labelList[i]
+
+        # Select exactly this item
+        self.labelList.selectionModel().clearSelection()
+        self.labelList.selectItem(item)
+
+        # Emit the same signal as a real double-click
+        self.labelList.itemDoubleClicked.emit(item)
+
+        # Advance AFTER dialog closes
+        self._review_label_index += 1
+        QtCore.QTimer.singleShot(0, self._review_next_label)
+    ## Jack
 
 def _scan_image_files(root_dir: str) -> list[str]:
     extensions: list[str] = [

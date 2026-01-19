@@ -46,6 +46,9 @@ class LabelDialog(QtWidgets.QDialog):
         self.edit.editingFinished.connect(self.postProcess)
         if flags:
             self.edit.textChanged.connect(self.updateFlags)
+        self.edit_type = QtWidgets.QComboBox()
+        self.edit_type.addItem("")
+        self.edit_type.addItems(["box", "bag", "flat"])
         self.edit_group_id = QtWidgets.QLineEdit()
         self.edit_group_id.setPlaceholderText("Group ID")
         self.edit_group_id.setValidator(
@@ -55,6 +58,7 @@ class LabelDialog(QtWidgets.QDialog):
         if show_text_field:
             layout_edit = QtWidgets.QHBoxLayout()
             layout_edit.addWidget(self.edit, 6)
+            layout_edit.addWidget(self.edit_type, 3)
             layout_edit.addWidget(self.edit_group_id, 2)
             layout.addLayout(layout_edit)
         # buttons
@@ -191,6 +195,14 @@ class LabelDialog(QtWidgets.QDialog):
             return int(group_id)
         return None
 
+    def getTypeText(self) -> str:
+        type_text = self.edit_type.currentText()
+        if hasattr(type_text, "strip"):
+            return str(type_text.strip())
+        if hasattr(type_text, "trimmed"):
+            return str(type_text.trimmed())
+        return str(type_text)
+
     def popUp(
         self,
         text=None,
@@ -198,6 +210,7 @@ class LabelDialog(QtWidgets.QDialog):
         flags=None,
         group_id=None,
         description=None,
+        type_text=None,
         flags_disabled: bool = False,
     ):
         if self._fit_to_content["row"]:
@@ -213,6 +226,8 @@ class LabelDialog(QtWidgets.QDialog):
         if description is None:
             description = ""
         self.editDescription.setPlainText(description)
+        if type_text is None:
+            type_text = ""
         if flags:
             self.setFlags(flags)
         else:
@@ -226,6 +241,9 @@ class LabelDialog(QtWidgets.QDialog):
             self.edit_group_id.clear()
         else:
             self.edit_group_id.setText(str(group_id))
+        if type_text not in ["", "box", "bag", "flat"]:
+            self.edit_type.addItem(type_text)
+        self.edit_type.setCurrentText(type_text)
         items = self.labelList.findItems(text, QtCore.Qt.MatchFixedString)
         if items:
             if len(items) != 1:
@@ -242,6 +260,7 @@ class LabelDialog(QtWidgets.QDialog):
                 self.getFlags(),
                 self.getGroupId(),
                 self.editDescription.toPlainText(),
+                self.getTypeText(),
             )
         else:
-            return None, None, None, None
+            return None, None, None, None, None

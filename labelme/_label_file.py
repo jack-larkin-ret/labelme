@@ -31,6 +31,7 @@ class ShapeDict(TypedDict):
     shape_type: str
     flags: dict[str, bool]
     description: str
+    type: str | None
     group_id: int | None
     mask: NDArray[np.bool] | None
     other_data: dict
@@ -44,6 +45,7 @@ def _load_shape_json_obj(shape_json_obj: dict) -> ShapeDict:
         "shape_type",
         "flags",
         "description",
+        "type",
         "mask",
     }
 
@@ -90,6 +92,16 @@ def _load_shape_json_obj(shape_json_obj: dict) -> ShapeDict:
         )
         description = shape_json_obj["description"]
 
+    label_type: str | None = None
+    if "type" in shape_json_obj:
+        if shape_json_obj["type"] is not None:
+            assert isinstance(shape_json_obj["type"], str), (
+                f"type must be str: {shape_json_obj['type']}"
+            )
+            label_type = shape_json_obj["type"]
+        else:
+            label_type = None
+
     group_id: int | None = None
     if shape_json_obj.get("group_id") is not None:
         assert isinstance(shape_json_obj["group_id"], int), (
@@ -112,6 +124,7 @@ def _load_shape_json_obj(shape_json_obj: dict) -> ShapeDict:
         shape_type=shape_type,
         flags=flags,
         description=description,
+        type=label_type,
         group_id=group_id,
         mask=mask,
         other_data=other_data,

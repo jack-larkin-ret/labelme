@@ -1228,6 +1228,7 @@ class MainWindow(QtWidgets.QMainWindow):
             edit_flags = True
             edit_group_id = True
             edit_description = True
+            edit_type = True
         else:
             edit_text = all(item.shape().label == shape.label for item in items[1:])
             edit_flags = all(item.shape().flags == shape.flags for item in items[1:])
@@ -1237,6 +1238,9 @@ class MainWindow(QtWidgets.QMainWindow):
             edit_description = all(
                 item.shape().description == shape.description for item in items[1:]
             )
+            edit_type = all(
+                item.shape().label_type == shape.label_type for item in items[1:]
+            )
 
         if not edit_text:
             self.labelDialog.edit.setDisabled(True)
@@ -1245,12 +1249,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.labelDialog.edit_group_id.setDisabled(True)
         if not edit_description:
             self.labelDialog.editDescription.setDisabled(True)
+        if not edit_type:
+            self.labelDialog.edit_type.setDisabled(True)
 
-        text, flags, group_id, description = self.labelDialog.popUp(
+        text, flags, group_id, description, type_text = self.labelDialog.popUp(
             text=shape.label if edit_text else "",
             flags=shape.flags if edit_flags else None,
             group_id=shape.group_id if edit_group_id else None,
             description=shape.description if edit_description else None,
+            type_text=shape.label_type if edit_type else None,
             flags_disabled=not edit_flags,
         )
 
@@ -1261,11 +1268,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.labelDialog.edit_group_id.setDisabled(False)
         if not edit_description:
             self.labelDialog.editDescription.setDisabled(False)
+        if not edit_type:
+            self.labelDialog.edit_type.setDisabled(False)
 
         if text is None:
             assert flags is None
             assert group_id is None
             assert description is None
+            assert type_text is None
             return
 
         if not self.validateLabel(text):
@@ -1289,16 +1299,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 shape.group_id = group_id
             if edit_description:
                 shape.description = description
+            if edit_type:
+                if shape.label_type is None and type_text == "":
+                    shape.label_type = None
+                else:
+                    shape.label_type = type_text
 
             self._update_shape_color(shape)
-            if shape.group_id is None:
-                r, g, b = shape.fill_color.getRgb()[:3]
-                item.setText(
-                    f"{html.escape(shape.label)} "
-                    f'<font color="#{r:02x}{g:02x}{b:02x}">●</font>'
-                )
-            else:
-                item.setText(f"{shape.label} ({shape.group_id})")
+            text = self._format_label_list_text(shape)
+            r, g, b = shape.fill_color.getRgb()[:3]
+            item.setText(
+                f'{html.escape(text)} <font color="#{r:02x}{g:02x}{b:02x}">●</font>'
+            )
             self.setDirty()
             if self.uniqLabelList.find_label_item(shape.label) is None:
                 self.uniqLabelList.add_label_item(
@@ -1345,10 +1357,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.edit.setEnabled(n_selected)
 
     def addLabel(self, shape):
-        if shape.group_id is None:
-            text = shape.label
-        else:
-            text = f"{shape.label} ({shape.group_id})"
+        text = self._format_label_list_text(shape)
         label_list_item = LabelListWidgetItem(text, shape)
         self.labelList.addItem(label_list_item)
         if self.uniqLabelList.find_label_item(shape.label) is None:
@@ -1364,6 +1373,14 @@ class MainWindow(QtWidgets.QMainWindow):
         label_list_item.setText(
             f'{html.escape(text)} <font color="#{r:02x}{g:02x}{b:02x}">●</font>'
         )
+
+    def _format_label_list_text(self, shape: Shape) -> str:
+        text = shape.label
+        if shape.label_type:
+            text = f"{text} [{shape.label_type}]"
+        if shape.group_id is None:
+            return text
+        return f"{text} ({shape.group_id})"
 
     def _update_shape_color(self, shape):
         r, g, b = self._get_rgb_by_label(shape.label)
@@ -1434,6 +1451,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 shape_type=shape_dict["shape_type"],
                 group_id=shape_dict["group_id"],
                 description=shape_dict["description"],
+                label_type=shape_dict["type"],
                 mask=shape_dict["mask"],
             )
             for x, y in shape_dict["points"]:
@@ -1471,6 +1489,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         def format_shape(s):
             data = s.other_data.copy()
+            if s.label_type is not None:
+                data["type"] = s.label_type
             data.update(
                 dict(
                     label=s.label,
@@ -1572,9 +1592,14 @@ class MainWindow(QtWidgets.QMainWindow):
         flags = {}
         group_id = None
         description = ""
+        label_type = None
         if self._config["display_label_popup"] or not text:
             previous_text = self.labelDialog.edit.text()
-            text, flags, group_id, description = self.labelDialog.popUp(text)
+            text, flags, group_id, description, type_text = self.labelDialog.popUp(text)
+            if type_text == "":
+                label_type = None
+            else:
+                label_type = type_text
             if not text:
                 self.labelDialog.edit.setText(previous_text)
 
@@ -1591,6 +1616,7 @@ class MainWindow(QtWidgets.QMainWindow):
             shape = self.canvas.setLastLabel(text, flags)
             shape.group_id = group_id
             shape.description = description
+            shape.label_type = label_type
             self.addLabel(shape)
             self.actions.editMode.setEnabled(True)
             self.actions.undoLastPoint.setEnabled(False)

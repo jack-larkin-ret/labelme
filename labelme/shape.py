@@ -49,6 +49,7 @@ class Shape:
         flags=None,
         group_id=None,
         description=None,
+        label_type=None,
         mask=None,
     ):
         self.label = label
@@ -63,6 +64,7 @@ class Shape:
         self.selected = False
         self.flags = flags
         self.description = description
+        self.label_type = label_type
         self.other_data = {}
         self.mask = mask
 

@@ -48,7 +48,7 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
         if index.column() != 0:
             textRect.adjust(5, 0, 0, 0)
 
-        thefuckyourshitup_constant = 4
+        thefuckyourshitup_constant = 4 # lol
         margin = (option.rect.height() - options.fontMetrics.height()) // 2
         margin = margin - thefuckyourshitup_constant
         textRect.setTop(textRect.top() + margin)

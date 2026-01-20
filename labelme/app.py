@@ -93,6 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
         output_file: str | None = None,
         output_dir: str | None = None,
         first_row: int = 0,
+        auto_click: bool = False,
     ) -> None:
         if output is not None:
             logger.warning("argument output is deprecated, use output_file instead")
@@ -104,6 +105,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if config is None:
             config = get_config()
         self._config = config
+
+        self.auto_click = auto_click
 
         # set default shape colors
         Shape.line_color = QtGui.QColor(*self._config["shape"]["line_color"])
@@ -1958,7 +1961,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fileListWidget.setCurrentRow(row_next)
         self.fileListWidget.repaint()
         ## Jack
-        self.start_review_labels()
+        if (self.auto_click): 
+            self.start_review_labels()
 
     def _open_file_with_dialog(self, _value: bool = False) -> None:
         if not self._can_continue():

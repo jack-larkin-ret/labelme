@@ -188,6 +188,13 @@ def main():
         help="Start at a certain image in the directory. The number entered here will match the number displayed on the top of the window.",
         default=0
     )
+    parser.add_argument(
+        "--autoclick",
+        dest="auto_click",
+        action="store_true",
+        help="auto click on labels when moving to next image",
+        default=argparse.SUPPRESS,
+    )
     args = parser.parse_args()
 
     if args.version:
@@ -225,6 +232,8 @@ def main():
     reset_config = config_from_args.pop("reset_config")
     filename = config_from_args.pop("filename")
     output = config_from_args.pop("output")
+    first_row = config_from_args.pop("first_row")
+    auto_click = config_from_args.pop("auto_click", False)
     config_file_or_yaml = config_from_args.pop("config")
     config = get_config(config_file_or_yaml, config_from_args)
 
@@ -257,13 +266,14 @@ def main():
     ## Jack - choosing lazyness here to match up with number displayed in top of window. 
     ## Set current row is robust enough to handle negative and if you enter a number 
     ## greater than the number of images it defaults to 0
-    first_row = int(args.first_row) - 2
+    first_row = int(first_row) - 2
     win = MainWindow(
         config=config,
         filename=filename,
         output_file=output_file,
         output_dir=output_dir,
         first_row=first_row,
+        auto_click=auto_click,
     )
 
     if reset_config:

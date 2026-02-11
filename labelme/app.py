@@ -94,6 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
         output_dir: str | None = None,
         first_row: int = 0,
         auto_click: bool = False,
+        type_options: list[str] | None = None,
     ) -> None:
         if output is not None:
             logger.warning("argument output is deprecated, use output_file instead")
@@ -141,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
             completion=self._config["label_completion"],
             fit_to_content=self._config["fit_to_content"],
             flags=self._config["label_flags"],
+            type_options=type_options,
         )
 
         self.labelList = LabelListWidget()

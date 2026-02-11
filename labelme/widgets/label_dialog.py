@@ -34,6 +34,7 @@ class LabelDialog(QtWidgets.QDialog):
         completion="startswith",
         fit_to_content=None,
         flags=None,
+        type_options=None,
     ):
         if fit_to_content is None:
             fit_to_content = {"row": False, "column": True}
@@ -46,9 +47,11 @@ class LabelDialog(QtWidgets.QDialog):
         self.edit.editingFinished.connect(self.postProcess)
         if flags:
             self.edit.textChanged.connect(self.updateFlags)
+        if type_options is None:
+            type_options = ["box", "bag", "flat"]
         self.edit_type = QtWidgets.QComboBox()
         self.edit_type.addItem("")
-        self.edit_type.addItems(["box", "bag", "flat"])
+        self.edit_type.addItems(type_options)
         self.edit_group_id = QtWidgets.QLineEdit()
         self.edit_group_id.setPlaceholderText("Group ID")
         self.edit_group_id.setValidator(

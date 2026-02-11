@@ -181,6 +181,12 @@ def main():
         help="epsilon to find nearest vertex on canvas",
         default=argparse.SUPPRESS,
     )
+    parser.add_argument(
+        "--type-options",
+        nargs="+",
+        default=["box", "bag", "flat"],
+        help="label type options for the label dialog",
+    )
     ## Jack
     parser.add_argument(
         "--firstrow",
@@ -274,6 +280,7 @@ def main():
         output_dir=output_dir,
         first_row=first_row,
         auto_click=auto_click,
+        type_options=args.type_options,
     )
 
     if reset_config:

@@ -244,7 +244,7 @@ class LabelDialog(QtWidgets.QDialog):
             self.edit_group_id.clear()
         else:
             self.edit_group_id.setText(str(group_id))
-        if type_text not in ["", "box", "bag", "flat"]:
+        if type_text and self.edit_type.findText(type_text) == -1:
             self.edit_type.addItem(type_text)
         self.edit_type.setCurrentText(type_text)
         items = self.labelList.findItems(text, QtCore.Qt.MatchFixedString)

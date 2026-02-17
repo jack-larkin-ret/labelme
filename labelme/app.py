@@ -1395,8 +1395,8 @@ class MainWindow(QtWidgets.QMainWindow):
         shape.fill_color = QtGui.QColor(r, g, b, 64)
         ## Jack - update 4th number to 0 to make transparent
         shape.select_line_color = QtGui.QColor(255, 255, 255, 0)
-        ## Jack - update 4th number to 0 to make transparent
-        shape.select_fill_color = QtGui.QColor(r, g, b, 0)
+        ## Jack
+        shape.select_fill_color = QtGui.QColor(r, g, b, 64)
 
     def _get_rgb_by_label(self, label: str) -> tuple[int, int, int]:
         if self._config["shape_color"] == "auto":
